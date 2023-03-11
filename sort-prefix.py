@@ -8,7 +8,7 @@ continents_asn = {}
 continents_numPrefixes = {"NA":0, "SA":0, "AS":0, "EU":0, "AF":0, "OC":0}
 unrecognized_asn = set()
 
-asnSortedFileName = "asn_sorted.txt"
+asnSortedFileName = "asn-sorted/asn_sorted.txt"
 with open(asnSortedFileName, 'r') as asnSortedFile:
     for line in asnSortedFile:
         line = line.rstrip("\n")
@@ -21,7 +21,7 @@ with open(asnSortedFileName, 'r') as asnSortedFile:
 interest = sys.argv[1]
 prefixes = []
 
-pfx2asFileName = "routeviews-rv2-20230301-1200.pfx2as"
+pfx2asFileName = "raw-data/routeviews-rv2-20230301-1200.pfx2as"
 with open(pfx2asFileName, 'r') as fpx2asFile:
     for line in fpx2asFile :
         line = line.rstrip("\n").split()
@@ -38,13 +38,14 @@ with open(pfx2asFileName, 'r') as fpx2asFile:
         
         if continent :
             continents_numPrefixes[continent] += 1
-            if continent == interest and int(len) <= 16 :
-                for subnet in list(ip_network(ip+"/"+len).subnets(new_prefix=16)) :
-                    prefixes.append(subnet)
+            if continent == interest : # and int(len) <= 16 :
+                prefixes.append(ip+"/"+len)
+                # for subnet in list(ip_network(ip+"/"+len).subnets(new_prefix=16)) :
+                #     prefixes.append(subnet)
         else :
             unrecognized_asn.add(asn)
 
-random.shuffle(prefixes)
+# random.shuffle(prefixes)
 for prefix in prefixes :
     print(prefix)
 # print("error unrecognized asn:", unrecognized_asn)
