@@ -52,12 +52,11 @@ for i in range(0, 17) :
         else :
             dictAdd(networks, prefix, prefix.num_addresses)
     networks = sorted(networks.items(), key=lambda item: item[1], reverse=True)
-    print("{:.2f}".format(100 * networks[0][1]/totalIP), end=" ")
-    # print("prefix_len:", curLevel, "num_addresses_per_network:", str(2**(32-curLevel)), "totalIpContinent:", str(totalIP))
-    # print("network" + "\t" + "goodIp/network(%)" + "\t" + "goodIp/totalIp(%)" + "\t" + "cumulatedGoodIp(%)")
-    # cumulated = 0
-    # for i in range(len(networks)) :
-    #     cumulated += 100 * networks[i][1] / totalIP
-    #     print(str(networks[i][0]) + "\t" + "{:.2f}".format(100 * networks[i][1] / networks[i][0].num_addresses) + "\t" + "{:.2f}".format(100 * networks[i][1] / totalIP) + "\t" + str(int(cumulated)))
-    # print()
+    print("prefix_len:", curLevel, "num_addresses_per_network:", str(2**(32-curLevel)), "totalIpContinent:", str(totalIP))
+    print("network" + "\t" + "goodIp/network(%)" + "\t" + "goodIp/totalIp(%)" + "\t" + "cumulatedGoodIp(%)")
+    cumulated = 0
+    for i in range(len(networks)) :
+        cumulated += 100 * networks[i][1] / totalIP
+        print(str(networks[i][0]) + "\t" + "{:.2f}".format(100 * networks[i][1] / networks[i][0].num_addresses) + "\t" + "{:.2f}".format(100 * networks[i][1] / totalIP) + "\t" + str(int(cumulated)))
+    print()
 print()
