@@ -39,25 +39,44 @@ with open(pfx2asFileName, 'r') as fpx2asFile:
         if asn in continents_asn[interest]:
             temp = ipad.ip_network(ip+"/"+length)
             totalIP += temp.num_addresses
-            prefixes.append(temp)
+            prefixes.append((temp, False))
 
-# print("continent:", interest, "\tnum_prefiex:", len(prefixes), "\tnum_ip", totalIP)
-# print(interest, end=" ")
 targets = []
-curLevel = 8
-networks = {}
-for prefix in prefixes:
-    if curLevel < prefix.prefixlen:
-        dictAdd(networks, prefix.supernet(new_prefix=curLevel), prefix.num_addresses)
-    elif curLevel > prefix.prefixlen:
-        for subnet in list(prefix.subnets(new_prefix=curLevel)):
-            dictAdd(networks, subnet, subnet.num_addresses)
-    else:
-        dictAdd(networks, prefix, prefix.num_addresses)
-networks = sorted(networks.items(), key=lambda item: item[1], reverse=True)
-for network, ipCnt in networks :
-    if ipCnt / network.num_addresses > 0.5 :
-        targets.append(network)
+for i in range(0, 17) :
+    curLevel = i
+    networks = {}
+    for prefix, selected in prefixes:
+        if selected :
+            continue
+        if curLevel < prefix.prefixlen:
+            dictAdd(networks, prefix.supernet(new_prefix=curLevel), prefix.num_addresses)
+        elif curLevel > prefix.prefixlen:
+            print("error:", str(prefix), "at level", curLevel)
+            for subnet in list(prefix.subnets(new_prefix=curLevel)):
+                dictAdd(networks, subnet, subnet.num_addresses)
+        else:
+            dictAdd(networks, prefix, prefix.num_addresses)
+    networks = sorted(networks.items(), key=lambda item: item[1], reverse=True)
+    for network, ipCnt in networks :
+        ratio = ipCnt / network.num_addresses
+        if ratio > 0.75 :
+            targets.append((network, ipCnt))
+            for i in range(len(prefixes)) :
+                prefix = prefixes[i][0]
+                selected = prefixes[i][1]
+                if not selected and network.supernet_of(prefix) :
+                    prefixes[i] = (prefix, True)
+
+print("continent:", interest, "\tnum_prefiex:", len(prefixes), "\tnum_ip", totalIP)
+print("network" + "\t" + "usefulRatioPer(%)" + "\t" + "totalProbe(%)" + "\t" + "usefulRatio(%)" + "\t" + "coverage(%)")
+
+cumulated = 0
+totalProbe = 0
+for network, ipCnt in targets :
+    cumulated += ipCnt
+    totalProbe += network.num_addresses
+    ratio = ipCnt / network.num_addresses
+    print(str(network) + "\t" + "{:.2f}".format(100*ratio) + "\t" + str(totalProbe) + "\t" + "{:.2f}".format(100*cumulated/totalProbe) + "\t" + "{:.2f}".format(100*cumulated/totalIP))
 
 # print("prefix_len:", curLevel, "num_addresses_per_network:", str(2**(32-curLevel)), "totalIpContinent:", str(totalIP))
 # print("network" + "\t" + "goodIp/network(%)" + "\t" + "goodIp/totalIp(%)" + "\t" + "cumulatedGoodIp(%)")
@@ -68,27 +87,27 @@ for network, ipCnt in networks :
 #           "\t" + "{:.2f}".format(100 * networks[i][1] / totalIP) + "\t" + str(int(cumulated)))
 # print()
 
-for i in range(0, 17):
-    curLevel = i
-    networks = {}
-    for prefix in prefixes:
-        if curLevel < prefix.prefixlen:
-            dictAdd(networks, prefix.supernet(
-                new_prefix=curLevel), prefix.num_addresses)
-        elif curLevel > prefix.prefixlen:
-            for subnet in list(prefix.subnets(new_prefix=curLevel)):
-                dictAdd(networks, subnet, subnet.num_addresses)
-        else:
-            dictAdd(networks, prefix, prefix.num_addresses)
-    networks = sorted(networks.items(), key=lambda item: item[1], reverse=True)
-    print("prefix_len:", curLevel, "num_addresses_per_network:",
-          str(2**(32-curLevel)), "totalIpContinent:", str(totalIP))
-    print("network" + "\t" + "goodIp/network(%)" + "\t" +
-          "goodIp/totalIp(%)" + "\t" + "cumulatedGoodIp(%)")
-    cumulated = 0
-    for i in range(len(networks)):
-        cumulated += 100 * networks[i][1] / totalIP
-        print(str(networks[i][0]) + "\t" + "{:.2f}".format(100 * networks[i][1] / networks[i][0].num_addresses) +
-              "\t" + "{:.2f}".format(100 * networks[i][1] / totalIP) + "\t" + str(int(cumulated)))
-    print()
-print()
+# for i in range(0, 17):
+#     curLevel = i
+#     networks = {}
+#     for prefix in prefixes:
+#         if curLevel < prefix.prefixlen:
+#             dictAdd(networks, prefix.supernet(
+#                 new_prefix=curLevel), prefix.num_addresses)
+#         elif curLevel > prefix.prefixlen:
+#             for subnet in list(prefix.subnets(new_prefix=curLevel)):
+#                 dictAdd(networks, subnet, subnet.num_addresses)
+#         else:
+#             dictAdd(networks, prefix, prefix.num_addresses)
+#     networks = sorted(networks.items(), key=lambda item: item[1], reverse=True)
+#     print("prefix_len:", curLevel, "num_addresses_per_network:",
+#           str(2**(32-curLevel)), "totalIpContinent:", str(totalIP))
+#     print("network" + "\t" + "goodIp/network(%)" + "\t" +
+#           "goodIp/totalIp(%)" + "\t" + "cumulatedGoodIp(%)")
+#     cumulated = 0
+#     for i in range(len(networks)):
+#         cumulated += 100 * networks[i][1] / totalIP
+#         print(str(networks[i][0]) + "\t" + "{:.2f}".format(100 * networks[i][1] / networks[i][0].num_addresses) +
+#               "\t" + "{:.2f}".format(100 * networks[i][1] / totalIP) + "\t" + str(int(cumulated)))
+#     print()
+# print()
