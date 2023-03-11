@@ -5,7 +5,6 @@ from ipaddress import ip_network
 
 continents = ["NA", "SA", "AS", "EU", "AF", "OC"]
 continents_asn = {}
-continents_numPrefixes = {"NA":0, "SA":0, "AS":0, "EU":0, "AF":0, "OC":0}
 unrecognized_asn = set()
 
 asnSortedFileName = "asn-sorted/asn_sorted.txt"
@@ -27,21 +26,13 @@ with open(pfx2asFileName, 'r') as fpx2asFile:
         line = line.rstrip("\n").split()
         ip = line[0]
         len = line[1]
-        asn = line[2].split('_')[0]
-        asn = asn.split(',')[0]
+        asn = line[2]
         continent = ""
 
-        for temp in continents :
-            if asn in continents_asn[temp] :
-                continent = temp
-                break
-        
-        if continent :
-            continents_numPrefixes[continent] += 1
-            if continent == interest : # and int(len) <= 16 :
-                prefixes.append(ip+"/"+len)
-                # for subnet in list(ip_network(ip+"/"+len).subnets(new_prefix=16)) :
-                #     prefixes.append(subnet)
+        if asn in continents_asn[interest] : # and int(len) <= 16:
+            prefixes.append(ip+"/"+len)
+            # for subnet in list(ip_network(ip+"/"+len).subnets(new_prefix=16)) :
+            #     prefixes.append(subnet)
         else :
             unrecognized_asn.add(asn)
 
@@ -49,4 +40,3 @@ with open(pfx2asFileName, 'r') as fpx2asFile:
 for prefix in prefixes :
     print(prefix)
 # print("error unrecognized asn:", unrecognized_asn)
-# print(continents_numPrefixes)

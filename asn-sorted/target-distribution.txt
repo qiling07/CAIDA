@@ -1,3 +1,4 @@
+# based on data get from CAIDA ASRank database
 continent : #asn #prefix #ip
 NA : 33606 334090 1464215072
 SA : 11639 104735 145080578
