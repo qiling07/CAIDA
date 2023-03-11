@@ -1,4 +1,6 @@
 import sys
+import os
+import random
 import ipaddress as ipad
 
 
@@ -67,47 +69,79 @@ for i in range(0, 17) :
                 if not selected and network.supernet_of(prefix) :
                     prefixes[i] = (prefix, True)
 
-print("continent:", interest, "\tnum_prefiex:", len(prefixes), "\tnum_ip", totalIP)
-print("network" + "\t" + "usefulRatioPer(%)" + "\t" + "totalProbe(%)" + "\t" + "usefulRatio(%)" + "\t" + "coverage(%)")
 
-cumulated = 0
-totalProbe = 0
-for network, ipCnt in targets :
-    cumulated += ipCnt
-    totalProbe += network.num_addresses
-    ratio = ipCnt / network.num_addresses
-    print(str(network) + "\t" + "{:.2f}".format(100*ratio) + "\t" + str(totalProbe) + "\t" + "{:.2f}".format(100*cumulated/totalProbe) + "\t" + "{:.2f}".format(100*cumulated/totalIP))
 
-# print("prefix_len:", curLevel, "num_addresses_per_network:", str(2**(32-curLevel)), "totalIpContinent:", str(totalIP))
-# print("network" + "\t" + "goodIp/network(%)" + "\t" + "goodIp/totalIp(%)" + "\t" + "cumulatedGoodIp(%)")
-# cumulated = 0
-# for i in range(len(networks)):
-#     cumulated += 100 * networks[i][1] / totalIP
-#     print(str(networks[i][0]) + "\t" + "{:.2f}".format(100 * networks[i][1] / networks[i][0].num_addresses) +
-#           "\t" + "{:.2f}".format(100 * networks[i][1] / totalIP) + "\t" + str(int(cumulated)))
-# print()
+def printRaw() :
+    print("continent:", interest, "\tnum_prefiex:", len(prefixes), "\tnum_ip", totalIP)
+    print("network" + "\t" + "usefulRatioPer(%)" + "\t" + "totalProbe(%)" + "\t" + "usefulRatio(%)" + "\t" + "coverage(%)")
+    cumulated = 0
+    totalProbe = 0
+    for network, ipCnt in targets :
+        cumulated += ipCnt
+        totalProbe += network.num_addresses
+        ratio = ipCnt / network.num_addresses
+        print(str(network) + "\t" + "{:.2f}".format(100*ratio) + "\t" + str(totalProbe) + "\t" + "{:.2f}".format(100*cumulated/totalProbe) + "\t" + "{:.2f}".format(100*cumulated/totalIP))
+# printRaw()
 
-# for i in range(0, 17):
-#     curLevel = i
-#     networks = {}
-#     for prefix in prefixes:
-#         if curLevel < prefix.prefixlen:
-#             dictAdd(networks, prefix.supernet(
-#                 new_prefix=curLevel), prefix.num_addresses)
-#         elif curLevel > prefix.prefixlen:
-#             for subnet in list(prefix.subnets(new_prefix=curLevel)):
-#                 dictAdd(networks, subnet, subnet.num_addresses)
-#         else:
-#             dictAdd(networks, prefix, prefix.num_addresses)
-#     networks = sorted(networks.items(), key=lambda item: item[1], reverse=True)
-#     print("prefix_len:", curLevel, "num_addresses_per_network:",
-#           str(2**(32-curLevel)), "totalIpContinent:", str(totalIP))
-#     print("network" + "\t" + "goodIp/network(%)" + "\t" +
-#           "goodIp/totalIp(%)" + "\t" + "cumulatedGoodIp(%)")
-#     cumulated = 0
-#     for i in range(len(networks)):
-#         cumulated += 100 * networks[i][1] / totalIP
-#         print(str(networks[i][0]) + "\t" + "{:.2f}".format(100 * networks[i][1] / networks[i][0].num_addresses) +
-#               "\t" + "{:.2f}".format(100 * networks[i][1] / totalIP) + "\t" + str(int(cumulated)))
-#     print()
-# print()
+
+## N=12 is a good approx for most continents except for OC
+def printByN(N) :
+    targetsN = []
+    cumulated = 0
+    totalProbe = 0
+    for network, ipCnt in targets :
+        if network.prefixlen <= N :
+            for temp in list(network.subnets(new_prefix=N)) :
+                targetsN.append((temp, network))
+            cumulated += ipCnt
+            totalProbe += network.num_addresses
+    targetsN = sorted(targetsN, key=lambda item: item[0].network_address)
+    print("#continent:", interest, "\tnum_prefiex:", len(prefixes), "\tnum_ip", totalIP)
+    print("#chosen:" + "\tnum_prefix_N:" + str(len(targetsN)) + "\tuseful_num_ip:" + str(cumulated) + "\t" + "\tnum_ip:" + str(totalProbe))
+    for target, father in targetsN :
+        print(str(target) + "\t" + str(father))
+
+# if interest == "OC" :
+#     printByN(14)
+# else :
+#     printByN(12)
+
+## generate directories and subnets(16)
+def printBy16(N, parent_dir) :
+    file12 = open(os.path.join(parent_dir, "12.prefixes"), "w")
+    targetsN = []
+    cumulated = 0
+    totalProbe = 0
+    for network, ipCnt in targets :
+        if network.prefixlen <= N :
+            for temp in list(network.subnets(new_prefix=N)) :
+                targetsN.append((temp, network))
+            cumulated += ipCnt
+            totalProbe += network.num_addresses
+    print("#continent:", interest, "\tnum_prefiex:", len(prefixes), "\tnum_ip", totalIP)
+    print("#chosen:" + "\tnum_prefix_N:" + str(len(targetsN)) + "\tuseful_num_ip:" + str(cumulated) + "\t" + "\tnum_ip:" + str(totalProbe))
+    random.shuffle(targetsN)
+    for target, father in targetsN :
+        file12.write(str(target) + "\n")
+        directory = os.path.join(parent_dir, str(target).replace("/", "_"))
+        os.mkdir(directory)
+        file16 = open(os.path.join(directory, "16.prefixes"), "w")
+        temp = list(target.subnets(new_prefix=16))
+        random.shuffle(temp)
+        for net16 in temp :
+            file16.write(str(net16) + "\n")
+        file16.close()
+    file12.close()
+
+directory = interest
+parent_dir = "/home/qi/probing/CAIDA/results/"
+parent_dir = os.path.join(parent_dir, directory)
+os.mkdir(path=parent_dir)
+
+if interest == "OC" :
+    printBy16(14, parent_dir)
+else :
+    printBy16(12, parent_dir)
+
+
+
