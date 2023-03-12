@@ -120,7 +120,7 @@ def printBy16(N, parent_dir) :
             totalProbe += network.num_addresses
     print("#continent:", interest, "\tnum_prefiex:", len(prefixes), "\tnum_ip", totalIP)
     print("#chosen:" + "\tnum_prefix_N:" + str(len(targetsN)) + "\tuseful_num_ip:" + str(cumulated) + "\t" + "\tnum_ip:" + str(totalProbe))
-    random.shuffle(targetsN)
+    # random.shuffle(targetsN)
     for target, father in targetsN :
         file12.write(str(target) + "\n")
         directory = os.path.join(parent_dir, str(target).replace("/", "_"))
