@@ -8,7 +8,9 @@ finalChoice = {"NA":ipad.ip_network("7.0.0.0/8"),
                "SA":ipad.ip_network("177.0.0.0/8"), 
                "OC":ipad.ip_network("203.0.0.0/8"), 
                "EU":ipad.ip_network("53.0.0.0/8"), 
-               "AF":ipad.ip_network("41.0.0.0/8")
+               "AF":ipad.ip_network("41.0.0.0/8"), 
+               "CN":ipad.ip_network("183.0.0.0/8"), # CN
+               "JP":ipad.ip_network("219.0.0.0/8")  # JP
                }
 
 def dictAdd(d, key, val, country):
@@ -48,7 +50,6 @@ def asn2Country(d, asn) :
     else :
         return "Unknown"
 
-continents = ["NA", "SA", "AS", "EU", "AF", "OC"]
 continents_asn = {}
 unrecognized_asn = set()
 
