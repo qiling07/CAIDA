@@ -13,6 +13,8 @@ finalChoice = {"NA": ipad.ip_network("7.0.0.0/8"),
                "JP": ipad.ip_network("219.0.0.0/8"),  # JP
                "NA-1": ipad.ip_network("97.0.0.0/8"),   # backup
                "NA-2": ipad.ip_network("34.0.0.0/8"),
+               "NA-3": ipad.ip_network("40.0.0.0/8"),
+               "NA-4": ipad.ip_network("104.0.0.0/8"),
                "EU-1": ipad.ip_network("84.0.0.0/8"),
                "EU-2": ipad.ip_network("91.0.0.0/8")
                }
