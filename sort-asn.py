@@ -1,9 +1,18 @@
 import json
+import ipaddress as ipad
 
-continents = ["NA", "SA", "AS", "EU", "AF", "OC"]
-continents_asn = {"NA":set(), "SA":set(), "AS":set(), "EU":set(), "AF":set(), "OC":set()}
-continents_numPrefixes = {"NA":0, "SA":0, "AS":0, "EU":0, "AF":0, "OC":0}
-continents_numIPs = {"NA":0, "SA":0, "AS":0, "EU":0, "AF":0, "OC":0}
+
+pfx2asFileName = "raw-data/routeviews-rv2-20230301-1200.pfx2as"
+with open(pfx2asFileName, 'r') as fpx2asFile:
+    for line in fpx2asFile :
+        line = line.rstrip("\n").split()
+        ip = line[0]
+        len = line[1]
+        asn = line[2]
+        if ipad.ip_address("47.88.46.116") in ipad.ip_network(ip + "/" + len) :
+            print(ip, len, asn)
+
+exit
 
 asInfoFileName = "asns.jsonl"
 with open(asInfoFileName, 'r') as asInfoFile :

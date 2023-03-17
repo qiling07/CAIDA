@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # continents=(NA SA AS EU AF OC)
-continents=(AS)
+continents=(NA-2 EU-1 EU-2)
 for continent in "${continents[@]}"
 do
 	echo ${continent}
